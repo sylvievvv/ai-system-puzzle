@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI system as a puzzle</title>
+<style>
+:root{
+  --bg:#f6f5f1;--surface:#ffffff;--text:#1f1e1d;--text2:#55534e;--muted:#8a8880;
+  --border:#e4e2db;--border-strong:#cfccc3;
+  --teal:#1D9E75;--teal-bg:#e7f5ef;--teal-dark:#085041;
+  --purple:#7F77DD;--purple-bg:#eeedfe;--purple-dark:#3C3489;
+  --coral:#D85A30;--coral-bg:#faece7;--coral-dark:#712B13;
+  --ink:#26215C;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+main{max-width:780px;margin:0 auto;padding:48px 20px 56px}
+
+header{margin-bottom:28px}
+.eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--purple-dark);background:var(--purple-bg);padding:4px 10px;border-radius:999px;margin-bottom:12px}
+h1{font-size:30px;line-height:1.2;font-weight:700;margin:0 0 10px;letter-spacing:-.01em}
+.intro{color:var(--text2);margin:0;font-size:16px;max-width:620px}
+
+.panel{margin-top:36px}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.panel h2{font-size:20px;font-weight:700;margin:0}
+.hint{font-size:13px;color:var(--muted)}
+
+svg{width:100%;height:auto;display:block}
+.th{font-size:17px;font-weight:700;fill:var(--text);letter-spacing:-.01em}
+.badge{font-size:12px;font-weight:700;fill:#fff}
+.ts{font-size:12.5px;fill:var(--text2)}
+.pz{cursor:pointer;transition:opacity .3s}
+.pz path{transition:fill-opacity .25s,stroke-width .25s}
+.pz:hover path{fill-opacity:.3}
+.pz.on path{fill-opacity:.45;stroke-width:2.5}
+.dim .pz:not(.on){opacity:.28}
+.pz:focus{outline:none}
+.pz:focus-visible path{stroke-width:3}
+
+.legend{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;margin-top:14px;font-size:13px;color:var(--text2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:12px;height:12px;border-radius:3px;border:1px solid}
+
+.info{margin-top:24px;border-left:3px solid var(--border-strong);padding-left:20px;transition:border-color .3s}
+.info .name{font-size:20px;font-weight:700;margin:0 0 2px}
+.info .tag{font-size:14px;color:var(--text2);margin:0 0 18px}
+.grid{display:grid;grid-template-columns:150px 1fr;gap:14px 20px}
+.grid dt{font-size:13px;font-weight:600;color:var(--muted);padding-top:2px}
+.grid dd{margin:0;font-size:15px}
+.quote{font-style:italic;color:var(--text2)}
+
+.progress{height:6px;background:var(--border);border-radius:999px;overflow:hidden;margin:4px 0 18px}
+.bar{height:100%;width:16.66%;background:var(--purple);border-radius:999px;transition:width .3s}
+.vraag{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:15px}
+.vraag b{font-weight:600;white-space:nowrap}
+.stepbox{display:flex;gap:16px;align-items:flex-start;min-height:96px}
+.num{flex:none;width:40px;height:40px;border-radius:50%;background:var(--purple);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:16px}
+.step-title{font-size:13px;color:var(--muted);margin:0 0 4px}
+#s-txt{margin:0;font-size:15px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px}
+
+.controls{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+.dots{display:flex;gap:6px}
+.dot{width:30px;height:30px;border-radius:50%;border:1px solid var(--border-strong);font:inherit;font-size:13px;color:var(--text2);cursor:pointer;background:var(--surface)}
+.dot.act{background:var(--purple);color:#fff;border-color:var(--purple)}
+.btns{display:flex;gap:8px}
+.btn{font:inherit;font-size:14px;font-weight:500;padding:8px 16px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface);color:var(--text);cursor:pointer}
+.btn:hover{border-color:var(--text2)}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.primary:hover{opacity:.9}
+
+footer{margin-top:28px;font-size:13px;color:var(--muted);text-align:center}
+
+@media (max-width:560px){
+  main{padding:28px 16px 40px}
+  h1{font-size:24px}
+  .panel{padding:18px}
+  .grid{grid-template-columns:1fr;gap:4px}
+  .grid dd{margin-bottom:12px}
+  .controls{flex-direction:column;align-items:stretch}
+  .btns{justify-content:space-between}
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>How does an AI application work?</h1>
+  <p class="intro">An AI application is made up of six puzzle pieces that fit together into one whole. The AI model is just one of them. Click a piece for an explanation, or follow a question step by step through the system below.</p>
+</header>
+
+<div class="puzzle">
+  <svg id="puz" viewBox="40 20 600 285" role="img" aria-labelledby="t d"><title id="t">AI system as a puzzle</title><desc id="d">Six clickable puzzle pieces: frontend, backend, AI model, tools, database and evaluation.</desc>
+  <g class="pz" id="p-frontend" tabindex="0" onclick="show('frontend')"><path d="M55 30 H245 V87 A10 10 0 1 1 245 103 V160 H158 A10 10 0 1 1 142 160 H55 Z" fill="#1D9E75" fill-opacity="0.14" stroke="#1D9E75" stroke-width="1.2"/>
+  <circle cx="150" cy="68" r="11" fill="#1D9E75"/><text class="badge" x="150" y="68" text-anchor="middle" dominant-baseline="central">1</text><text class="th" x="150" y="98" text-anchor="middle" dominant-baseline="central">Frontend</text><text class="ts" x="150" y="124" text-anchor="middle" dominant-baseline="central">What the user sees</text></g>
+  <g class="pz" id="p-backend" tabindex="0" onclick="show('backend')"><path d="M245 30 H435 V87 A10 10 0 1 1 435 103 V160 H348 A10 10 0 1 1 332 160 H245 V103 A10 10 0 1 0 245 87 Z" fill="#1D9E75" fill-opacity="0.14" stroke="#1D9E75" stroke-width="1.2"/>
+  <circle cx="340" cy="68" r="11" fill="#1D9E75"/><text class="badge" x="340" y="68" text-anchor="middle" dominant-baseline="central">2</text><text class="th" x="340" y="98" text-anchor="middle" dominant-baseline="central">Backend</text><text class="ts" x="340" y="124" text-anchor="middle" dominant-baseline="central">The director</text></g>
+  <g class="pz" id="p-ai" tabindex="0" onclick="show('ai')"><path d="M435 30 H625 V160 H538 A10 10 0 1 1 522 160 H435 V103 A10 10 0 1 0 435 87 Z" fill="#7F77DD" fill-opacity="0.14" stroke="#7F77DD" stroke-width="1.2"/>
+  <circle cx="530" cy="68" r="11" fill="#7F77DD"/><text class="badge" x="530" y="68" text-anchor="middle" dominant-baseline="central">3</text><text class="th" x="530" y="98" text-anchor="middle" dominant-baseline="central">AI model</text><text class="ts" x="530" y="124" text-anchor="middle" dominant-baseline="central">Understands and decides</text></g>
+  <g class="pz" id="p-eval" tabindex="0" onclick="show('eval')"><path d="M55 160 H142 A10 10 0 1 0 158 160 H245 V217 A10 10 0 1 1 245 233 V290 H55 Z" fill="#D85A30" fill-opacity="0.14" stroke="#D85A30" stroke-width="1.2"/>
+  <circle cx="150" cy="198" r="11" fill="#D85A30"/><text class="badge" x="150" y="198" text-anchor="middle" dominant-baseline="central">6</text><text class="th" x="150" y="228" text-anchor="middle" dominant-baseline="central">Evaluation</text><text class="ts" x="150" y="254" text-anchor="middle" dominant-baseline="central">Tests and monitors</text></g>
+  <g class="pz" id="p-db" tabindex="0" onclick="show('db')"><path d="M245 160 H332 A10 10 0 1 0 348 160 H435 V217 A10 10 0 1 1 435 233 V290 H245 V233 A10 10 0 1 0 245 217 Z" fill="#1D9E75" fill-opacity="0.14" stroke="#1D9E75" stroke-width="1.2"/>
+  <circle cx="340" cy="198" r="11" fill="#1D9E75"/><text class="badge" x="340" y="198" text-anchor="middle" dominant-baseline="central">5</text><text class="th" x="340" y="228" text-anchor="middle" dominant-baseline="central">Database</text><text class="ts" x="340" y="254" text-anchor="middle" dominant-baseline="central">The memory</text></g>
+  <g class="pz" id="p-tools" tabindex="0" onclick="show('tools')"><path d="M435 160 H522 A10 10 0 1 0 538 160 H625 V290 H435 V233 A10 10 0 1 0 435 217 Z" fill="#7F77DD" fill-opacity="0.14" stroke="#7F77DD" stroke-width="1.2"/>
+  <circle cx="530" cy="198" r="11" fill="#7F77DD"/><text class="badge" x="530" y="198" text-anchor="middle" dominant-baseline="central">4</text><text class="th" x="530" y="228" text-anchor="middle" dominant-baseline="central">Tools</text><text class="ts" x="530" y="254" text-anchor="middle" dominant-baseline="central">The agent's hands</text></g>
+  </svg>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--teal-bg);border-color:var(--teal)"></i>Application</span>
+    <span><i class="sw" style="background:var(--purple-bg);border-color:var(--purple)"></i>AI part</span>
+    <span><i class="sw" style="background:var(--coral-bg);border-color:var(--coral)"></i>Quality control</span>
+  </div>
+</div>
+
+<div class="info" id="info">
+  <p class="name" id="i-title">Click a puzzle piece</p>
+  <p class="tag" id="i-tag">Each piece has its own job.</p>
+  <dl class="grid">
+    <dt>What does it do?</dt><dd id="i-wat">Only when all the pieces fit together do you have a working AI application.</dd>
+    <dt>Example</dt><dd id="i-vb">A website where customers can ask questions about their order.</dd>
+    <dt>In a job interview</dt><dd><div class="quote" id="i-sol">"The AI model is one part of my system, not the whole system."</div></dd>
+  </dl>
+</div>
+
+<section class="panel">
+  <div class="panel-head"><h2>Follow a question through the system</h2><span class="hint" id="s-kop">Step 1 of 6</span></div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div class="vraag"><b>User:</b><span>"Why hasn't my order shipped yet?"</span></div>
+  <div class="stepbox">
+    <div class="num" id="s-num">1</div>
+    <div><p class="step-title" id="s-title"></p><p id="s-txt"></p><div class="chips" id="chips"></div></div>
+  </div>
+  <div class="controls">
+    <div class="dots" id="dots"></div>
+    <div class="btns"><button class="btn" onclick="reset()">Show all</button><button class="btn" onclick="step(-1)">Previous</button><button class="btn primary" onclick="step(1)">Next</button></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+const C={frontend:"teal",backend:"teal",db:"teal",ai:"purple",tools:"purple",eval:"coral"};
+const N={frontend:"Frontend",backend:"Backend",ai:"AI model",tools:"Tools",db:"Database",eval:"Evaluation"};
+const D={
+frontend:["1. Frontend","What the user sees","The interface where the user types, clicks and sees the result. The frontend collects the input and passes it on to the backend. There is no AI logic here, and certainly no secret API key.","A chat window on a website, a dashboard or a Discord bot. Often built with HTML, CSS and JavaScript or React.","\"The frontend is the front door: it sends the question to my backend and presents the answer neatly to the user.\""],
+backend:["2. Backend","The director","The central part that coordinates everything. It checks whether the user is logged in, fetches data from the database, sends the question to the AI model, runs tools when the model asks for them and sends the answer back. The model's API key is stored safely here.","Python code with FastAPI or Flask, or JavaScript with Node.js.","\"My backend is the director: it decides what information the AI model gets and carries out the actions.\""],
+ai:["3. AI model","Understands and decides","The language model that understands the question and decides what needs to happen. It receives text: a system prompt with instructions, the conversation so far and a list of tools it may use. It returns text, or a request to use a tool. Important: the model remembers nothing between two calls. The backend sends the context along every time. You can use different models, and sometimes even several in one application.","Claude (Anthropic), GPT (OpenAI), Gemini (Google) or an open model such as Llama or Mistral. For example: a fast, cheap model for simple questions and a stronger model for difficult tasks.","\"The AI model is the thinking part: it understands the question and decides what information is needed, but doesn't execute anything itself. Because it's a separate component, I can swap it for a different model.\""],
+tools:["4. Tools","The agent's hands","Functions that you as a developer write and describe to the AI model. The model can ask: 'call get_order_status with order number 123'. The backend actually runs that function and returns the result to the model. Tools turn a chatbot into an agent that can look things up and take action.","Querying a webshop API, searching the web, sending an email or running a calculation.","\"With tools I give the AI model access to real systems, but my code decides what actually gets executed.\""],
+db:["5. Database","The memory","Stores everything that needs to last longer than a single conversation: users, settings, conversation history and orders. Because the AI model remembers nothing itself, the database is the real memory of your application. Sometimes you also use a vector database so the model can search your own documents (RAG).","PostgreSQL, SQLite or MongoDB. For documents, a vector database for example.","\"The database is the long-term memory; the backend fetches the relevant pieces and hands them to the AI model.\""],
+eval:["6. Evaluation","Tests and monitors","Checks whether the system does what it should. You create test questions with expected answers, log what the AI model does, handle errors (what if a tool doesn't respond?) and measure quality. At companies like DataRobot this is one of the most important parts.","A list of twenty test questions you rerun after every change, plus logs of every conversation.","\"I don't just build the agent, I also measure whether it works reliably and what happens when something goes wrong.\""]};
+const S=[
+[["frontend"],"Question comes in","The user types the question in the chat window. The frontend sends it to the backend."],
+[["backend","db"],"Gathering context","The backend checks whether the user is logged in and fetches customer data and previous messages from the database."],
+[["backend","ai"],"The AI model thinks","The backend sends the question, the context and the available tools to the AI model. The model concludes it needs the order status and asks for the tool get_order_status."],
+[["backend","tools"],"Tool is executed","The backend actually runs the tool, for example through the webshop's API. Result: 'Awaiting payment'."],
+[["ai"],"Writing the answer","The result goes back to the AI model. The model writes a clear answer: the payment hasn't come in yet, which is why the order hasn't shipped."],
+[["frontend","eval"],"Showing and logging the answer","The backend sends the answer to the frontend and the user sees it. Meanwhile the conversation is logged, so you can check later whether the answer was correct."]];
+const $=id=>document.getElementById(id);
+const svg=$('puz'),dots=$('dots'),info=$('info');
+let cur=0;
+function hi(list){document.querySelectorAll('.pz').forEach(g=>g.classList.remove('on'));list.forEach(k=>$('p-'+k).classList.add('on'));svg.classList.toggle('dim',list.length>0)}
+function show(k){const d=D[k];$('i-title').textContent=d[0];$('i-tag').textContent=d[1];$('i-wat').textContent=d[2];$('i-vb').textContent=d[3];$('i-sol').textContent=d[4];info.style.borderLeftColor='var(--'+C[k]+')';hi([k])}
+document.querySelectorAll('.pz').forEach(g=>g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();g.onclick()}}));
+S.forEach((_,i)=>{const b=document.createElement('button');b.className='dot';b.textContent=i+1;b.setAttribute('aria-label','Step '+(i+1));b.onclick=()=>go(i);dots.appendChild(b)});
+function go(i){cur=(i+S.length)%S.length;const s=S[cur];
+  $('s-kop').textContent='Step '+(cur+1)+' of '+S.length;$('s-num').textContent=cur+1;$('s-title').textContent=s[1];$('s-txt').textContent=s[2];
+  $('bar').style.width=((cur+1)/S.length*100)+'%';
+  $('chips').innerHTML='';s[0].forEach(k=>{const c=document.createElement('span');c.className='chip';c.textContent=N[k];c.style.background='var(--'+C[k]+'-bg)';c.style.color='var(--'+C[k]+'-dark)';$('chips').appendChild(c)});
+  [...dots.children].forEach((d,j)=>d.classList.toggle('act',j===cur));hi(s[0])}
+function step(n){go(cur+n)}
+function reset(){hi([]);[...dots.children].forEach(d=>d.classList.remove('act'))}
+go(0);hi([]);
+</script>
+</body>
+</html>
